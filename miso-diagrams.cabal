@@ -1,0 +1,69 @@
+cabal-version: 3.0
+name: miso-diagrams
+version: 0.1.0.0
+synopsis: Draw diagrams in Miso
+homepage: https://github.com/haskell-miso/miso-diagrams/blob/master/README.md
+license: BSD-3-Clause
+license-file: LICENSE
+author: ners
+maintainer: ners@gmx.ch
+bug-reports: https://github.com/haskell-miso/miso-diagrams/issues
+category: System
+build-type: Simple
+extra-source-files:
+  README.md
+
+source-repository head
+  type: git
+  location: https://github.com/haskell-miso/miso-diagrams
+
+common common
+  default-language: GHC2021
+  ghc-options:
+    -Weverything
+    -Wno-unsafe
+    -Wno-missing-safe-haskell-mode
+    -Wno-missing-export-lists
+    -Wno-missing-import-lists
+    -Wno-missing-kind-signatures
+    -Wno-all-missed-specialisations
+
+  default-extensions:
+    ApplicativeDo
+    BlockArguments
+    DataKinds
+    DefaultSignatures
+    DeriveAnyClass
+    DeriveGeneric
+    DerivingStrategies
+    DerivingVia
+    ExplicitNamespaces
+    LambdaCase
+    NoImplicitPrelude
+    OverloadedLabels
+    OverloadedRecordDot
+    OverloadedStrings
+    RecordWildCards
+    RecursiveDo
+    StrictData
+    TypeFamilies
+    ViewPatterns
+  build-depends:
+    base,
+    miso,
+
+library
+  import: common
+  hs-source-dirs: src
+  exposed-modules:
+    Miso.Canvas.Diagrams
+  build-depends:
+    NumInstances,
+    containers,
+    diagrams-core,
+    diagrams-lib,
+    jsaddle,
+    lens,
+    mtl,
+    statestack,
+    text,
