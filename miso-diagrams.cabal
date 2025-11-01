@@ -17,6 +17,13 @@ source-repository head
   type: git
   location: https://github.com/haskell-miso/miso-diagrams
 
+common wasm
+  if arch(wasm32)
+    ghc-options:
+      -no-hs-main -optl-mexec-model=reactor "-optl-Wl,--export=hs_start"
+    cpp-options:
+      -DWASM
+
 common common
   default-language: GHC2021
   ghc-options:
@@ -50,6 +57,7 @@ common common
     ViewPatterns
   build-depends:
     base,
+    diagrams-lib,
     miso,
 
 library
@@ -61,9 +69,17 @@ library
     NumInstances,
     containers,
     diagrams-core,
-    diagrams-lib,
     jsaddle,
     lens,
     mtl,
     statestack,
     text,
+
+executable example
+  import: wasm, common
+  hs-source-dirs: example
+  main-is: Main.hs
+  build-depends:
+    Chart,
+    Chart-diagrams,
+    miso-diagrams,
