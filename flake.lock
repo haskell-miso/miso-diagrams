@@ -584,15 +584,15 @@
         "servant": "servant"
       },
       "locked": {
-        "lastModified": 1761965803,
-        "narHash": "sha256-NLo+xwF0nDcyxJMp/8JaHRsHN2IANRXtpogaB3h0g8Q=",
-        "owner": "dmjio",
+        "lastModified": 1762031616,
+        "narHash": "sha256-IgUolXFKbBk8opMlFZWfmczEV9e7ow9B265LidESJIY=",
+        "owner": "haskell-miso",
         "repo": "miso",
-        "rev": "a9b7467993a22dc0d0a842695f6cadf2a0a01923",
+        "rev": "879bae2cb873a80672997d8b0daedfbaa42258d2",
         "type": "github"
       },
       "original": {
-        "owner": "dmjio",
+        "owner": "haskell-miso",
         "repo": "miso",
         "type": "github"
       }

@@ -75,7 +75,7 @@ library
     statestack,
     text,
 
-executable example
+executable app
   import: wasm, common
   hs-source-dirs: example
   main-is: Main.hs
