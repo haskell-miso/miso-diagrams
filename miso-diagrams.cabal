@@ -75,11 +75,10 @@ library
     statestack,
     text,
 
-executable app
+executable example
   import: wasm, common
   hs-source-dirs: example
   main-is: Main.hs
   build-depends:
-    Chart,
-    Chart-diagrams,
     miso-diagrams,
+    plots,

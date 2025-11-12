@@ -3,14 +3,13 @@
 module Main where
 
 import Data.String (IsString (fromString))
+import Diagrams.Coordinates.Polar
 import Diagrams.Prelude
-import Graphics.Rendering.Chart.Backend.Diagrams qualified as Chart
-import Graphics.Rendering.Chart.Easy qualified as Chart
 import Miso
 import Miso.Canvas qualified as Canvas
 import Miso.Canvas.Diagrams
 import Miso.Html.Property
-import System.IO.Unsafe (unsafePerformIO)
+import Plots
 import Prelude
 
 #ifdef WASM
@@ -45,15 +44,19 @@ appUpdate Setup = pure ()
 appView :: Model -> View Model Action
 appView _model =
     Canvas.canvas [width_ (fromString . show @Int $ w), height_ (fromString . show @Int $ h)] (const $ pure ()) \() ->
-        renderDia Canvas (CanvasOptions absolute) . fst . Chart.runBackendR env . Chart.toRenderable . Chart.execEC $ do
-            Chart.layout_title .= "Amplitude Modulation"
-            Chart.plot (Chart.line "am" [signal [0, (0.5) .. 400]])
-            Chart.plot (Chart.points "am points" (signal [0, 7 .. 400]))
+        renderDia Canvas (CanvasOptions absolute) . renderAxis $
+            polarAxis &~ do
+                let ps, ps' :: (Enum n, RealFloat n) => [Polar n]
+                    ps = [mkPolar x theta | x <- [35], theta <- [20 @@ deg, 40 @@ deg .. fullTurn]]
+                    ps' = (_r *~ 0.6) <$> ps
+
+                scatterPlot ps $ key "points"
+                scatterPlot ps' $ key "points'"
+
+                legendPlacement .= rightTop
+                rLabel .= "r-axis"
+                thetaLabel .= "theta-axis"
   where
     w, h :: (Num a) => a
     w = 800
-    h = 300
-    env :: Chart.DEnv Double
-    env = unsafePerformIO $ Chart.defaultEnv Chart.vectorAlignmentFns w h
-    signal :: [Double] -> [(Double, Double)]
-    signal xs = [(x, (sin (x * pi / 45) + 1) / 2 * (sin (x * pi / 5))) | x <- xs]
+    h = 800

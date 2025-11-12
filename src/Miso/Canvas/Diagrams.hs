@@ -4,7 +4,7 @@
 module Miso.Canvas.Diagrams where
 
 import Control.Lens.Operators hiding ((#))
-import Control.Monad (when, forM_)
+import Control.Monad (forM_, when)
 import Control.Monad.Reader (ReaderT)
 import Control.Monad.State (State, evalState)
 import Control.Monad.StateStack (StateStackT, evalStateStackT)
@@ -35,6 +35,7 @@ data Canvas = Canvas
     deriving stock (Eq, Ord, Read, Show)
 
 type instance V Canvas = V2
+
 type instance N Canvas = Double
 
 data CanvasState = CanvasState
@@ -72,11 +73,11 @@ instance Backend Canvas V2 Double where
         { _canvasSize :: SizeSpec V2 Double
         }
 
-    renderRTree ::
-        Canvas ->
-        Options Canvas V2 Double ->
-        RTree Canvas V2 Double Annotation ->
-        Result Canvas V2 Double
+    renderRTree
+        :: Canvas
+        -> Options Canvas V2 Double
+        -> RTree Canvas V2 Double Annotation
+        -> Result Canvas V2 Double
     renderRTree _ _ rt = evalState canvasOutput initialCanvasRenderState
       where
         canvasOutput :: State CanvasRenderState (Miso.Canvas ())
@@ -96,7 +97,7 @@ toRender =
         . (: [])
         . splitTextureFills
   where
-    fromRTree :: Renderable (Prim b V2 Double) Canvas => Tree (RNode b V2 Double a) -> Render Canvas V2 Double
+    fromRTree :: (Renderable (Prim b V2 Double) Canvas) => Tree (RNode b V2 Double a) -> Render Canvas V2 Double
     fromRTree (Node (RPrim p) _) = render Canvas p
     fromRTree (Node (RStyle sty) rs) = C $ do
         save
