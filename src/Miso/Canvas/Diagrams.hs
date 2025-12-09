@@ -83,7 +83,7 @@ instance Backend Canvas V2 Double where
         canvasOutput :: State CanvasRenderState (Miso.Canvas ())
         canvasOutput = do
             let C r = toRender rt
-            return $ runRenderM $ r
+            pure . runRenderM $ r
 
     adjustDia c opts d = adjustDia2D size c opts (d # reflectY)
 
@@ -115,7 +115,7 @@ initialCanvasRenderState = CanvasRenderState
 getSize :: Options Canvas V2 Double -> SizeSpec V2 Double
 getSize (CanvasOptions{_canvasSize = s}) = s
 
-setSize :: Options Canvas V2 Double -> (SizeSpec V2 Double) -> Options Canvas V2 Double
+setSize :: Options Canvas V2 Double -> SizeSpec V2 Double -> Options Canvas V2 Double
 setSize o s = o{_canvasSize = s}
 
 size :: Lens' (Options Canvas V2 Double) (SizeSpec V2 Double)
@@ -159,7 +159,7 @@ relCurveTo ax ay bx by cx cy = do
 
 -- | Get an accumulated style attribute from the render monad state.
 getStyleAttrib :: (AttributeClass a) => (a -> b) -> RenderM (Maybe b)
-getStyleAttrib f = (fmap f . getAttr) <$> use accumStyle
+getStyleAttrib f = fmap f . getAttr <$> use accumStyle
 
 {- | From the HTML5 canvas specification regarding line width:
 
@@ -193,7 +193,7 @@ texture styleFn (SC (SomeColor c)) o = liftC . styleFn $ s
     s = showColorJS c o
 texture styleFn (LG g) _ = liftC $ do
     grd <- Miso.createLinearGradient (x0, y0, x1, y1)
-    mapM_ (\(stop, c) -> Miso.addColorStop (grd, stop, c)) stops
+    mapM_ (\(stop, c) -> Miso.addColorStop (stop, c) grd) stops
     styleFn grd
   where
     (x0, y0) = unp2 $ transform (g ^. lGradTrans) (g ^. lGradStart)
@@ -201,7 +201,7 @@ texture styleFn (LG g) _ = liftC $ do
     stops = map (\s -> (s ^. stopFraction, showColorJS (s ^. stopColor) 1)) (g ^. lGradStops)
 texture styleFn (RG g) _ = liftC $ do
     grd <- Miso.createRadialGradient (x0, y0, r0, x1, y1, r1)
-    mapM_ (\(stop, c) -> Miso.addColorStop (grd, stop, c)) stops
+    mapM_ (\(stop, c) -> Miso.addColorStop (stop, c) grd) stops
     styleFn grd
   where
     (r0, r1) = (s * g ^. rGradRadius0, s * g ^. rGradRadius1)
@@ -253,7 +253,7 @@ showFontJS wgt slant sz fnt = Text.concat [a, " ", b, " ", c, " ", d]
     d = Text.pack fnt
 
 renderC :: (Renderable a Canvas, V a ~ V2, N a ~ Double) => a -> RenderM ()
-renderC a = case (render Canvas a) of C r -> r
+renderC a = let C r = render Canvas a in r
 
 canvasStyle :: Style v Double -> RenderM ()
 canvasStyle s =
@@ -355,7 +355,7 @@ instance Renderable (DImage Double External) Canvas where
         img <- liftC . liftJSM . Miso.newImage . toMisoString $ file
         let w = fromIntegral w'
             h = fromIntegral h'
-            x = -w / 2
-            y = -h / 2
+            x = - (w / 2)
+            y = - (h / 2)
         liftC $ Miso.drawImage' (img, x, y, w, h)
         restore
