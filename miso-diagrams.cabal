@@ -69,7 +69,6 @@ library
     NumInstances,
     containers,
     diagrams-core,
-    jsaddle,
     lens,
     mtl,
     statestack,

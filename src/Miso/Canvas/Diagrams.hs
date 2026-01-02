@@ -5,6 +5,7 @@ module Miso.Canvas.Diagrams where
 
 import Control.Lens.Operators hiding ((#))
 import Control.Monad (forM_, when)
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (ReaderT)
 import Control.Monad.State (State, evalState)
 import Control.Monad.StateStack (StateStackT, evalStateStackT)
@@ -22,10 +23,11 @@ import Diagrams.TwoD.Adjust (adjustDia2D)
 import Diagrams.TwoD.Attributes (splitTextureFills)
 import Diagrams.TwoD.Path (Clip (Clip))
 import Diagrams.TwoD.Text (FontSlant (..), FontWeight (..), Text (..), TextAlignment (..), getFont, getFontSize, getFontSlant, getFontWeight)
-import Language.Javascript.JSaddle (JSM, MakeArgs, liftJSM)
-import Miso (newImage, toMisoString)
 import Miso.CSS.Color qualified as Miso
 import Miso.Canvas qualified as Miso
+import Miso.DSL (ToArgs)
+import Miso.FFI qualified as Miso (newImage)
+import Miso.String (toMisoString)
 import Prelude
 
 {- | This data declaration is simply used as a token to distinguish
@@ -52,7 +54,7 @@ instance Default CanvasState where
             , _csPos = (0, 0)
             }
 
-type RenderM a = StateStackT CanvasState (ReaderT Miso.CanvasContext2D JSM) a
+type RenderM a = StateStackT CanvasState (ReaderT Miso.CanvasContext2D IO) a
 
 liftC :: Miso.Canvas a -> RenderM a
 liftC = lift
@@ -187,7 +189,7 @@ clip = liftC $ Miso.clip ()
 byteRange :: Double -> Word8
 byteRange d = floor (d * 255)
 
-texture :: (forall args. (MakeArgs args) => args -> Miso.Canvas ()) -> Texture Double -> Double -> RenderM ()
+texture :: (forall args. (ToArgs args) => args -> Miso.Canvas ()) -> Texture Double -> Double -> RenderM ()
 texture styleFn (SC (SomeColor c)) o = liftC . styleFn $ s
   where
     s = showColorJS c o
@@ -352,7 +354,7 @@ instance Renderable (DImage Double External) Canvas where
         let ImageRef file = path
         save
         canvasTransform (tr <> reflectionY)
-        img <- liftC . liftJSM . Miso.newImage . toMisoString $ file
+        img <- liftC . liftIO . Miso.newImage . toMisoString $ file
         let w = fromIntegral w'
             h = fromIntegral h'
             x = - (w / 2)
