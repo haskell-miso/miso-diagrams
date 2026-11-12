@@ -25,23 +25,22 @@ emptyModel = Model
 data Action = Setup
 
 main :: IO ()
-main = run $ startApp app
+main = startApp (defaultEvents <> keyboardEvents) app
 
 app :: App Model Action
 app = do
     initComponent
-        { events = defaultEvents <> keyboardEvents
-        , initialAction = Just Setup
+        { mount = Just Setup
         , styles = []
         }
   where
-    initComponent :: Component ROOT Model Action
+    initComponent :: Component () () Model Action
     initComponent = component emptyModel appUpdate appView
 
-appUpdate :: Action -> Effect ROOT Model Action
+appUpdate :: Action -> Effect () () Model Action
 appUpdate Setup = pure ()
 
-appView :: Model -> View Model Action
+appView :: Model -> View () () Model Action
 appView _model =
     Canvas.canvas [width_ (fromString . show @Int $ w), height_ (fromString . show @Int $ h)] (const $ pure ()) \() ->
         renderDia Canvas (CanvasOptions absolute) . renderAxis $
